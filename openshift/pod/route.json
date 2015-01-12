@@ -1,0 +1,12 @@
+{
+    "metadata": {
+        "name": "route-secure"
+    },
+    "id": "route-secure",
+    "apiVersion": "v1beta1",
+    "kind": "Route",
+    "host": "www.example.com",
+    "serviceName": "hello-nginx-secure",
+    "tls": { "termination" : "pod" }
+}
+

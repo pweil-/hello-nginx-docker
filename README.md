@@ -63,9 +63,9 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
     router               origin-haproxy-router-router   openshift/origin-haproxy-router   openshiftdev.local/   <none>                    Running
     hello-nginx-docker   hello-nginx-docker-pod         pweil/hello-nginx-docker          openshiftdev.local/   name=hello-nginx-docker   Running
 
-    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/service.json 
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/service.json
     hello-nginx
-    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/route.json 
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/route.json
     route-unsecure
     [vagrant@openshiftdev ~]$ curl -H Host:www.example.com 10.0.2.15
     Hello World
@@ -139,9 +139,82 @@ unsecure and secure route together.
     # 127.0.0.1 openshiftdev.local openshiftdev
     # ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
     # 10.0.2.15 www.example.com
-    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem 
+    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
     Hello World
 
 
+### UC 3: Pod termination (aka passthrough)
+This use case assumes that you are starting from scratch and demonstrates a secure, pod terminated route.  Prior to running
+this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
+still exists
+
+    # install the router
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    Creating router file and starting pod...
+    router
+
+    [vagrant@openshiftdev origin]$ openshift cli get pods
+    POD                 CONTAINER(S)                   IMAGE(S)                          HOST                  LABELS              STATUS
+    router              origin-haproxy-router-router   openshift/origin-haproxy-router   openshiftdev.local/   <none>              Running
+
+    # install the pod
+    [vagrant@openshiftdev origin]$ cd
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/nginx_pod.json
+    hello-nginx-docker
+
+    [vagrant@openshiftdev ~]$ openshift cli get pods
+    POD                  CONTAINER(S)                   IMAGE(S)                          HOST                  LABELS                    STATUS
+    router               origin-haproxy-router-router   openshift/origin-haproxy-router   openshiftdev.local/   <none>                    Running
+    hello-nginx-docker   hello-nginx-docker-pod         pweil/hello-nginx-docker          openshiftdev.local/   name=hello-nginx-docker   Running
+
+    # install the service and route
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/pod/service.json
+    hello-nginx-secure
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/pod/route.json
+    route-secure
+
+    # validate the certificate being served
+    [vagrant@openshiftdev ~]$ openssl s_client -servername www.example.com -connect 10.0.2.15:443 | grep 'subject\|issuer'
+    depth=1 C = US, ST = SC, L = Default City, O = Default Company Ltd, OU = Test CA, CN = www.exampleca.com, emailAddress = example@example.com
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    subject=/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
+    issuer=/C=US/ST=SC/L=Default City/O=Default Company Ltd/OU=Test CA/CN=www.exampleca.com/emailAddress=example@example.com
+    ^C
+
+    # validate the response
+    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+
+    # in depth review
+    [vagrant@openshiftdev ~]$ sudo nsenter -m -u -n -i -p -t <pid of your router container>
+    [root@router /]# cd /var/lib/haproxy/conf
+
+    # map indicating that translates the host name (via sni) to the backend name
+    [root@router conf]# cat os_tcp_be.map
+    www.example.com hello-nginx-secure
+
+    # map indicating that this route should be treated as a passthrough (by using the os_tcp_be.map)
+    [root@router conf]# cat os_sni_passthrough.map
+    www.example.com 1
+
+
+    # tcp backend created for the service
+    [root@router conf]# vi haproxy.config
+    ... removed for clarity ...
+    frontend public_ssl
+      bind :443
+        tcp-request  inspect-delay 5s
+        tcp-request content accept if { req_ssl_hello_type 1 }
+
+        # if the connection is SNI and the route is a passthrough don't use the termination backend, just use the tcp backend
+        acl sni req.ssl_sni -m found
+        acl sni_passthrough req.ssl_sni,map(/var/lib/haproxy/conf/os_sni_passthrough.map) -m found
+        use_backend be_tcp_%[req.ssl_sni,map(/var/lib/haproxy/conf/os_tcp_be.map)] if sni sni_passthrough
+
+    ... removed for clarity ...
+    backend be_tcp_hello-nginx-secure
+      balance leastconn
+      timeout check 5000ms
+      server hello-nginx-secure 172.17.0.30:443 check inter 5000ms
 
 
