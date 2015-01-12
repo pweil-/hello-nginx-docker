@@ -1,0 +1,27 @@
+{
+  "id": "hello-nginx-docker",
+  "kind": "Pod",
+  "apiVersion":"v1beta2",
+  "labels": {
+    "name": "hello-nginx-docker"
+  },
+  "desiredState": {
+    "manifest": {
+      "version": "v1beta1",
+      "id": "hello-nginx-docker-pod",
+      "containers": [{
+        "name": "hello-nginx-docker-pod",
+        "image": "pweil/hello-nginx-docker",
+        "ports": [
+          {
+            "containerPort": 80
+          },
+          {
+            "containerPort": 443
+          }
+        ]
+      }]
+    }
+  },
+}
+

@@ -1,0 +1,10 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1beta1",
+    "id": "hello-nginx-docker-service",
+    "port": 27017,
+    "selector": {
+        "name": "hello-nginx-docker"
+    },
+}
+
