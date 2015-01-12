@@ -125,4 +125,23 @@ unsecure and secure route together.
     [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/edge/route.json
     route-edge
 
+    # verify the certificate is being served correctly by the router
+    [vagrant@openshiftdev ~]$ openssl s_client -servername www.example.com -connect 10.0.2.15:443 | grep 'subject\|issuer'
+    depth=1 C = US, ST = SC, L = Default City, O = Default Company Ltd, OU = Test CA, CN = www.exampleca.com, emailAddress = example@example.com
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    subject=/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
+    issuer=/C=US/ST=SC/L=Default City/O=Default Company Ltd/OU=Test CA/CN=www.exampleca.com/emailAddress=example@example.com
+    ^C
+
+    # verify hello world
+    # add a host entry to /etc/hosts that points to the router
+    # 127.0.0.1 openshiftdev.local openshiftdev
+    # ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    # 10.0.2.15 www.example.com
+    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem 
+    Hello World
+
+
+
 
