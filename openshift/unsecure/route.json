@@ -6,7 +6,7 @@
     "apiVersion": "v1beta1",
     "kind": "Route",
     "host": "www.example.com",
-    "serviceName": "hello-nginx-docker"
+    "serviceName": "hello-nginx",
     "containerPort": 80
 }
 

@@ -46,6 +46,29 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
     [vagrant@openshiftdev origin]$ sudo /data/src/github.com/openshift/origin/_output/local/bin/linux/amd64/openshift start --loglevel=4
 
     # deploy the router, non-secure pod, service, and route
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    Creating router file and starting pod...
+    router
+    [vagrant@openshiftdev origin]$ openshift cli get pods
+    POD                 CONTAINER(S)                   IMAGE(S)                          HOST                  LABELS              STATUS
+    router              origin-haproxy-router-router   openshift/origin-haproxy-router   openshiftdev.local/   <none>              Running
+
+    [vagrant@openshiftdev ~]$ cd
+    [vagrant@openshiftdev ~]$ git clone https://github.com/pweil-/hello-nginx-docker.git
+    # starting the pod may take a while, it must download the container
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/nginx_pod.json pods
+    hello-nginx-docker
+    [vagrant@openshiftdev ~]$ openshift cli get pods
+    POD                  CONTAINER(S)                   IMAGE(S)                          HOST                  LABELS                    STATUS
+    router               origin-haproxy-router-router   openshift/origin-haproxy-router   openshiftdev.local/   <none>                    Running
+    hello-nginx-docker   hello-nginx-docker-pod         pweil/hello-nginx-docker          openshiftdev.local/   name=hello-nginx-docker   Running
+
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/service.json 
+    hello-nginx
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/route.json 
+    route-secure
+    [vagrant@openshiftdev ~]$ curl -H Host:www.example.com 10.0.2.15
+    Hello World
 
 
 
