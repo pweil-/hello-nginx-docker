@@ -21,7 +21,7 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
     subject=/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
     issuer=/C=US/ST=SC/L=Default City/O=Default Company Ltd/OU=Test CA/CN=www.exampleca.com/emailAddress=example@example.com
 
-## Testing with openshift routing beta1
+## Testing with OpenShift V3 routing beta1
 
 ### UC 1: non ssl enabled application
 
@@ -122,4 +122,7 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
 This use case assumes that you are starting from the ending point of UC 1 and will demonstrate using both an
 unsecure and secure route together.
 
-    
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/edge/route.json
+    route-edge
+
+
