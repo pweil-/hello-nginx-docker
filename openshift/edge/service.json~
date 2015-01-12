@@ -1,9 +1,9 @@
 {
     "kind": "Service",
     "apiVersion": "v1beta1",
-    "id": "hello-nginx",
-    "port": 27017,
-    "containerPort": 80,
+    "id": "frontend-service-tls",
+    "port": 27443,
+    "containerPort": 443,
     "selector": {
         "name": "hello-nginx-docker"
     },

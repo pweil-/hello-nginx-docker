@@ -1,8 +1,8 @@
 {
     "metadata": {
-        "name": "route-secure"
+        "name": "route-unsecure"
     },
-    "id": "hello-route",
+    "id": "route-unsecure",
     "apiVersion": "v1beta1",
     "kind": "Route",
     "host": "www.example.com",

@@ -66,9 +66,60 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
     [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/service.json 
     hello-nginx
     [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/unsecure/route.json 
-    route-secure
+    route-unsecure
     [vagrant@openshiftdev ~]$ curl -H Host:www.example.com 10.0.2.15
     Hello World
 
+    # the below steps are for in depth testing/demonstration purposes only and aren't necessarily required
+    # to satisy the qa environment
+
+    # find the docker container running the router and enter it
+    [vagrant@openshiftdev ~]$ docker ps
+    [vagrant@openshiftdev ~]$ docker inspect 71ef | grep Pid
+        "Pid": 5686,
+    [vagrant@openshiftdev ~]$ sudo nsenter -m -u -n -i -p -t 5686
+    [root@router /]# cd /var/lib/containers/router/
+
+    # view the created router state
+    [root@router router]# cat routes.json
+    {
+      "hello-nginx": {
+        "Name": "hello-nginx",
+        "EndpointTable": {
+          "172.17.0.14:80": {
+            "ID": "172.17.0.14:80",
+            "IP": "172.17.0.14",
+            "Port": "80"
+          }
+        },
+        "ServiceAliasConfigs": {
+          "www.example.com-": {
+            "Host": "www.example.com",
+            "Path": "",
+            "TLSTermination": "",
+            "Certificates": null
+          }
+        }
+      },
+
+     .... removed for clarity ...
+
+    [root@router conf]# cd /var/lib/haproxy/conf
+
+    # view the created http backend
+    [root@router conf]# cat haproxy.config
+    .... removed for clarity ....
+    backend be_http_hello-nginx
+      mode http
+      balance leastconn
+      timeout check 5000ms
+      server hello-nginx 172.17.0.14:80 check inter 5000ms
+
+    [root@router conf]# exit
 
 
+### UC 2: Edge terminated route using SNI and custom cert
+This use case assumes that you are starting from the ending point of UC 1 and will demonstrate using both an
+unsecure and secure route together.
+
+    

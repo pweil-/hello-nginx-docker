@@ -1,0 +1,17 @@
+{
+    "metadata": {
+        "name": "route-edge"
+    },
+    "id": "route-edge",
+    "apiVersion": "v1beta1",
+    "kind": "Route",
+    "host": "www.example.com",
+    "serviceName": "hello-nginx",
+    "tls": {
+        "termination": "edge",
+        "certificateFile": "~/hello-nginx-docker/certs/example.pem",
+        "keyFile": "~/hello-nginx-docker/certs/example.key",
+        "caCertificateFile": "~/hello-nginx-docker/certs/mypersonalca/certs/ca.pem"
+     }
+}
+
