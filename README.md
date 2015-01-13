@@ -286,6 +286,12 @@ this use case it is assumed you have built and started OpenShift.
 
        default_backend openshift_default
 
+    ... removed for clarity ...
+    backend be_secure_hello-nginx-secure
+      balance leastconn
+      timeout check 5000ms
+      server hello-nginx-secure 172.17.0.12:443 ssl check inter 5000ms verify required ca-file /var/lib/containers/router/cacerts/www.example2.com_pod.pem
+
     # the reencryption mapping that signals a secure tcp backend should be used
     [root@router conf]# cat os_reencrypt.map
     www.example2.com 1
