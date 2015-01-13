@@ -1,12 +1,18 @@
 {
     "metadata": {
-        "name": "route-secure"
+        "name": "route-reencrypt"
     },
-    "id": "route-secure",
+    "id": "route-reencrypt",
     "apiVersion": "v1beta1",
     "kind": "Route",
-    "host": "www.example.com",
+    "host": "www.example2.com",
     "serviceName": "hello-nginx-secure",
-    "tls": { "termination" : "pod" }
+    "tls": {
+        "termination": "reencrypt",
+        "certificateFile": "/home/vagrant/hello-nginx-docker/certs/example2.pem",
+        "keyFile": "/home/vagrant/hello-nginx-docker/certs/example2.key",
+        "caCertificateFile": "/home/vagrant/hello-nginx-docker/certs/mypersonalca/certs/ca.pem",
+        "podCaCertificateFile": "/home/vagrant/hello-nginx-docker/certs/mypersonalca/certs/ca.pem"
+     }
 }
 
