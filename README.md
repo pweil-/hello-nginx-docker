@@ -2,6 +2,10 @@
 This repository provides some helper applications and configurations for testing TLS termination in the OpenShift
 enviroment.  It is meant for testing purposes only, the certificates contained within this project are not valid.
 
+It is important to note that routing for beta 1 relies on SNI for custom certificate delivery.  In future iterations
+it is planned to be able to offer custom frontend implementations which will allow applications to serve non-sni
+traffic with custom certificates.
+
 ## Building the docker image
     docker build -t pweil/hello-nginx-docker .
 
@@ -118,7 +122,7 @@ enviroment.  It is meant for testing purposes only, the certificates contained w
     [root@router conf]# exit
 
 
-### UC 2: Edge terminated route using SNI and custom cert
+### UC 2: Edge terminated route with custom cert
 This use case assumes that you are starting from the ending point of UC 1 and will demonstrate using both an
 unsecure and secure route together.
 
@@ -144,7 +148,7 @@ unsecure and secure route together.
 
 
 ### UC 3: Pod termination (aka passthrough)
-This use case assumes that you are starting from scratch and demonstrates a secure, pod terminated route.  Prior to running
+This use case assumes that you are starting with an empty OpenShift environment and demonstrates a secure, pod terminated route.  Prior to running
 this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
 still exists
 
@@ -217,4 +221,77 @@ still exists
       timeout check 5000ms
       server hello-nginx-secure 172.17.0.30:443 check inter 5000ms
 
+
+### UC 4: Reencrypt termination 
+This use case assumes that you are starting with an empty OpenShift environment.  Prior to running
+this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
+still exists
+
+    # install the router
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    Creating router file and starting pod...
+    router
+
+    # install the pod, service, and route
+    [vagrant@openshiftdev origin]$ cd
+    [vagrant@openshiftdev ~]$ git clone https://github.com/pweil-/hello-nginx-docker.git
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/nginx_pod.json
+    hello-nginx-docker
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/reencrypt/service.json
+    hello-nginx-secure
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/reencrypt/route.json
+    route-reencrypt
+
+    # verify the pod certificate is www.example.com
+    [vagrant@openshiftdev ~]$ openshift cli get pod hello-nginx-docker -o json | grep podIP
+
+    [vagrant@openshiftdev ~]$ openssl s_client -connect 172.17.0.22:443 | grep 'subject\|issuer'
+    depth=1 C = US, ST = SC, L = Default City, O = Default Company Ltd, OU = Test CA, CN = www.exampleca.com, emailAddress = example@example.com
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    subject=/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
+    issuer=/C=US/ST=SC/L=Default City/O=Default Company Ltd/OU=Test CA/CN=www.exampleca.com/emailAddress=example@example.com
+    ^C
+
+    # verify the route certificate is www.example2.com
+    [vagrant@openshiftdev ~]$ openssl s_client -connect 10.0.2.15:443 -servername www.example2.com | grep 'subject\|issuer'
+    depth=1 C = US, ST = SC, L = Default City, O = Default Company Ltd, OU = Test CA, CN = www.exampleca.com, emailAddress = example@example.com
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    subject=/CN=www.example2.com/ST=SC/C=SU/emailAddress=example@example.com/O=Example2/OU=Example2
+    issuer=/C=US/ST=SC/L=Default City/O=Default Company Ltd/OU=Test CA/CN=www.exampleca.com/emailAddress=example@example.com
+
+    # verify the output of the route to ensure connectivity
+    # first, create a host entry for www.example2.com in /etc/hosts similar to the use cases above
+    [vagrant@openshiftdev ~]$ curl https://www.example2.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+    Hello World
+
+    # in depth review
+    [vagrant@openshiftdev ~]$ sudo nsenter -m -u -n -i -p -t <pid of your router container>
+    [root@router /]# cd /var/lib/haproxy/conf
+
+    # the haproxy.conf relevant to termination + reencryption
+    [root@router conf]# cat haproxy.config
+    ... removed for clarity ...
+    frontend fe_sni
+       # terminate ssl on edge
+       bind 127.0.0.1:10444 ssl crt /var/lib/containers/router/certs accept-proxy
+       mode http
+
+       # re-ssl?
+       acl reencrypt hdr(host),map(/var/lib/haproxy/conf/os_reencrypt.map) -m found
+       use_backend be_secure_%[hdr(host),map(/var/lib/haproxy/conf/os_tcp_be.map)] if reencrypt
+
+       # regular http
+       use_backend be_http_%[hdr(host),map(/var/lib/haproxy/conf/os_http_be.map)] if TRUE
+
+       default_backend openshift_default
+
+    # the reencryption mapping that signals a secure tcp backend should be used
+    [root@router conf]# cat os_reencrypt.map
+    www.example2.com 1
+
+    # the mapping of host -> backend
+    [root@router conf]# cat os_tcp_be.map
+    www.example2.com hello-nginx-secure
 
