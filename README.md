@@ -224,8 +224,7 @@ still exists
 
 ### UC 4: Reencrypt termination 
 This use case assumes that you are starting with an empty OpenShift environment.  Prior to running
-this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
-still exists
+this use case it is assumed you have built and started OpenShift.
 
     # install the router
     [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
