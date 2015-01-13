@@ -7,6 +7,6 @@
     "kind": "Route",
     "host": "www.example.com",
     "serviceName": "hello-nginx-secure",
-    "tls": { "termination" : "pod" }
+    "tls": { "termination" : "passthrough" }
 }
 

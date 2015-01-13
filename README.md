@@ -147,7 +147,7 @@ unsecure and secure route together.
     Hello World
 
 
-### UC 3: Pod termination (aka passthrough)
+### UC 3: Passthrough termination
 This use case assumes that you are starting with an empty OpenShift environment and demonstrates a secure, pod terminated route.  Prior to running
 this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
 still exists
@@ -172,9 +172,9 @@ still exists
     hello-nginx-docker   hello-nginx-docker-pod         pweil/hello-nginx-docker          openshiftdev.local/   name=hello-nginx-docker   Running
 
     # install the service and route
-    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/pod/service.json
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/passthrough/service.json
     hello-nginx-secure
-    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/pod/route.json
+    [vagrant@openshiftdev ~]$ openshift cli create -f hello-nginx-docker/openshift/passthrough/route.json
     route-secure
 
     # validate the certificate being served
@@ -188,6 +188,7 @@ still exists
 
     # validate the response
     [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+    Hello World
 
     # in depth review
     [vagrant@openshiftdev ~]$ sudo nsenter -m -u -n -i -p -t <pid of your router container>
