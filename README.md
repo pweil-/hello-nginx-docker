@@ -49,8 +49,14 @@ traffic with custom certificates.
     [vagrant@openshiftdev origin]$ export PATH=${ORIGIN_BASE}/_output/local/bin/linux/amd64:$PATH
     [vagrant@openshiftdev origin]$ sudo /data/src/github.com/openshift/origin/_output/local/bin/linux/amd64/openshift start --loglevel=4
 
-    # deploy the router, non-secure pod, service, and route
-    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    # If running in https mode, ensure openshift cli can authenticate
+    [vagrant@openshiftdev origin]$ sudo chmod a+r openshift.local.certificates/admin/*
+    [vagrant@openshiftdev origin]$ export KUBECONFIG=/data/src/github.com/openshift/origin/openshift.local.certificates/admin/.kubeconfig
+    [vagrant@openshiftdev origin]$ export OPENSHIFT_CA_DATA=$(</data/src/github.com/openshift/origin/openshift.local.certificates/master/root.crt)
+
+
+    # deploy the router, non-secure pod, service, and route.  If running in non-https mode please adjust the url accordingly
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router https://10.0.2.15:8443
     Creating router file and starting pod...
     router
     [vagrant@openshiftdev origin]$ openshift cli get pods
@@ -153,7 +159,7 @@ this use case it is assumed you have built and started OpenShift.  This also ass
 still exists
 
     # install the router
-    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router https://10.0.2.15:8443
     Creating router file and starting pod...
     router
 
@@ -228,7 +234,7 @@ This use case assumes that you are starting with an empty OpenShift environment.
 this use case it is assumed you have built and started OpenShift.
 
     # install the router
-    [vagrant@openshiftdev origin]$ hack/install-router.sh router 10.0.2.15
+    [vagrant@openshiftdev origin]$ hack/install-router.sh router https://10.0.2.15:8443
     Creating router file and starting pod...
     router
 
