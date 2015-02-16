@@ -145,18 +145,13 @@ unsecure and secure route together.
     ^C
 
     # verify hello world
-    # add a host entry to /etc/hosts that points to the router
-    # 127.0.0.1 openshiftdev.local openshiftdev
-    # ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-    # 10.0.2.15 www.example.com
-    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+    [vagrant@openshiftdev ~]$ curl --resolve www.example.com:443:10.0.2.15 https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
     Hello World
 
 
 ### UC 3: Passthrough termination
 This use case assumes that you are starting with an empty OpenShift environment and demonstrates a secure, pod terminated route.  Prior to running
-this use case it is assumed you have built and started OpenShift.  This also assumes that the host entry for www.example.com
-still exists
+this use case it is assumed you have built and started OpenShift.
 
     # install the router
     [vagrant@openshiftdev origin]$ hack/install-router.sh router https://10.0.2.15:8443
@@ -193,7 +188,7 @@ still exists
     ^C
 
     # validate the response
-    [vagrant@openshiftdev ~]$ curl https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+    [vagrant@openshiftdev ~]$ curl --resolve www.example.com:443:10.0.2.15 https://www.example.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
     Hello World
 
     # in depth review
@@ -269,7 +264,7 @@ this use case it is assumed you have built and started OpenShift.
 
     # verify the output of the route to ensure connectivity
     # first, create a host entry for www.example2.com in /etc/hosts similar to the use cases above
-    [vagrant@openshiftdev ~]$ curl https://www.example2.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
+    [vagrant@openshiftdev ~]$ curl --resolve www.example2.com:443:10.0.2.15 https://www.example2.com --cacert hello-nginx-docker/certs/mypersonalca/certs/ca.pem
     Hello World
 
     # in depth review
