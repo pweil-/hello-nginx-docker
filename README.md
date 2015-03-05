@@ -302,3 +302,38 @@ this use case it is assumed you have built and started OpenShift.
     [root@router conf]# cat os_tcp_be.map
     www.example2.com hello-nginx-secure
 
+### Path based routes
+Path based route examples rely on some of the existing services that were created in the use cases above.  These examples
+assume that you have your router and nginx pod installed and running.
+
+    # Create the unsecure service if necessary
+    [vagrant@openshiftdev unsecure]$ osc create -f service.json
+    hello-nginx
+    [vagrant@openshiftdev unsecure]$ osc create -f route_path.json
+    route-unsecure-path
+
+    # Curling the host itself should not return succesfully
+    [vagrant@openshiftdev unsecure]$ curl --resolve www.example.com:80:10.0.2.15 http://www.example.com
+    <html><body><h1>503 Service Unavailable</h1>
+    No server is available to handle this request.
+    </body></html>
+
+    # Curling the path should work
+    [vagrant@openshiftdev unsecure]$ curl --resolve www.example.com:80:10.0.2.15 http://www.example.com/test/
+    Hello World Test
+
+    [vagrant@openshiftdev unsecure]$ cd ../edge/
+
+    # Edge terminated example
+    [vagrant@openshiftdev edge]$ osc create -f route_path.json
+    route-edge-path
+
+    # Curling the host itself should not return succesfully
+    [vagrant@openshiftdev edge]$ curl -k --resolve www.example.com:443:10.0.2.15 https://www.example.com
+    <html><body><h1>503 Service Unavailable</h1>
+    No server is available to handle this request.
+    </body></html>
+
+    # Curling the path should work
+    [vagrant@openshiftdev edge]$ curl -k --resolve www.example.com:443:10.0.2.15 https://www.example.com/test/
+    Hello World Test
