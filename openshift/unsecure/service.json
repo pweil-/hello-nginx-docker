@@ -1,11 +1,15 @@
 {
     "kind": "Service",
-    "apiVersion": "v1beta1",
-    "id": "hello-nginx",
-    "port": 27017,
-    "containerPort": 80,
-    "selector": {
-        "name": "hello-nginx-docker"
+    "apiVersion": "v1beta3",
+    "metadata": {
+    	"name": "hello-nginx"
     },
+    "spec": {
+    	"port": 27017,
+    	"targetPort": 80,
+    	"selector": {
+        	"name": "hello-nginx-docker"
+    	}
+    }
 }
 
