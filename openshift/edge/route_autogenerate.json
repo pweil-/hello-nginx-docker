@@ -1,0 +1,13 @@
+{
+    "metadata": {
+        "name": "route-edge-gen"
+    },
+    "id": "route-edge-gen",
+    "apiVersion": "v1beta1",
+    "kind": "Route",
+    "serviceName": "hello-nginx",
+    "tls": {
+        "termination": "edge"
+     }
+}
+

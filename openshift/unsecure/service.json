@@ -5,7 +5,13 @@
     	"name": "hello-nginx"
     },
     "spec": {
-    	"port": 27017,
+    	"ports": [
+		{
+			"name": "http",
+			"protocol": "tcp",
+			"port": 27017
+		}
+	],
     	"targetPort": 80,
     	"selector": {
         	"name": "hello-nginx-docker"
