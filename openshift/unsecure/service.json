@@ -9,10 +9,10 @@
 		{
 			"name": "http",
 			"protocol": "tcp",
-			"port": 27017
+			"port": 27017,
+    	"targetPort": 80
 		}
 	],
-    	"targetPort": 80,
     	"selector": {
         	"name": "hello-nginx-docker"
     	}
