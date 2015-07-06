@@ -5,7 +5,7 @@
     "id": "route-edge-gen",
     "apiVersion": "v1beta1",
     "kind": "Route",
-    "serviceName": "hello-nginx",
+    "serviceName": "hello-nginx-http",
     "tls": {
         "termination": "edge"
      }

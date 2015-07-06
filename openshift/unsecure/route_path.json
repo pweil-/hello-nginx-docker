@@ -7,6 +7,6 @@
     "kind": "Route",
     "host": "www.example.com",
     "path": "/test",
-    "serviceName": "hello-nginx"
+    "serviceName": "hello-nginx-http"
 }
 
