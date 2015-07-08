@@ -2,18 +2,18 @@
     "kind": "Service",
     "apiVersion": "v1beta3",
     "metadata": {
-            "name": "hello-nginx"
+            "name": "hello-nginx-https"
     },
     "spec": {
-            "ports": [
-                {
-                        "name": "http",
-                        "port": 27443,
-                        "targetPort": 443
-                }
-        ],
-            "selector": {
-                "name": "hello-nginx-docker"
+        "ports": [
+            {
+                "name": "http",
+                "port": 27443,
+                "targetPort": 443
             }
+        ],
+        "selector": {
+            "name": "hello-nginx-docker"
+        }
     }
 }

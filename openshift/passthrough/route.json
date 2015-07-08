@@ -2,11 +2,14 @@
     "metadata": {
         "name": "route-secure"
     },
-    "id": "route-secure",
-    "apiVersion": "v1beta1",
+    "apiVersion": "v1beta3",
     "kind": "Route",
-    "host": "www.example.com",
-    "serviceName": "hello-nginx",
-    "tls": { "termination" : "passthrough" }
+    "spec": {
+       "host": "www.example.com",
+        "to": {
+            "name": "hello-nginx-https"
+        },
+       "tls": { "termination" : "passthrough" }
+    }
 }
 
