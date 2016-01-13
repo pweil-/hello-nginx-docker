@@ -1,3 +1,3 @@
-V	160112141941Z		01	unknown	/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
-V	160113133402Z		02	unknown	/CN=www.example2.com/ST=SC/C=SU/emailAddress=example@example.com/O=Example2/OU=Example2
 V	160415195626Z		03	unknown	/CN=*.v3.openshift.com/ST=SC/C=US/emailAddress=example@example.com/O=DO NOT USE
+V	160415204624Z		04	unknown	/CN=*.router.default.local/ST=SC/C=US/emailAddress=example@example.com/O=DO NOT USE
+V	260110194057Z		06	unknown	/CN=www.example.com/ST=SC/C=US/emailAddress=example@example.com/O=Example/OU=Example
