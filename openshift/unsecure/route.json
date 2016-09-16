@@ -2,7 +2,7 @@
     "metadata": {
         "name": "route-unsecure"
     },
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "kind": "Route",
     "spec": {
         "host": "www.example.com",
